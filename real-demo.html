@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design Lang — The Real Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..800&family=JetBrains+Mono:wght@300..700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0e1a;--surface:rgba(15,23,42,0.8);--border:rgba(255,255,255,0.06);--accent:#06B6D4;--text:#E2E8F0;--dim:#64748B;--mono:'JetBrains Mono',monospace;--sans:'Inter',system-ui,sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);padding:24px;max-width:1100px;margin:0 auto;line-height:1.5}
+h1{font-size:2rem;font-weight:700;letter-spacing:-0.02em}
+h2{font-size:1.3rem;font-weight:600;margin-bottom:8px}
+p{color:var(--dim);font-size:0.9rem;max-width:700px;margin-bottom:16px}
+code{font-family:var(--mono);font-size:0.82rem}
+a{color:var(--accent)}
+.glass{background:var(--surface);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:12px}
+
+/* Header */
+header{padding:40px 0 16px;border-bottom:1px solid rgba(255,255,255,0.04);margin-bottom:40px}
+header p{color:var(--dim);margin-top:4px;font-size:0.95rem}
+
+/* Problem / Solution */
+.problem-box{background:rgba(255,45,120,0.06);border-left:3px solid #FF2D78;border-radius:0 8px 8px 0;padding:16px 20px;margin-bottom:32px}
+.problem-box p{color:#FF8A9E;font-size:0.9rem;margin:0}
+.solution-box{background:rgba(6,182,212,0.06);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:16px 20px;margin-bottom:32px}
+.solution-box p{color:#8BE8FF;font-size:0.9rem;margin:0;max-width:100%}
+
+/* Demo sections */
+.demo{margin-bottom:48px;padding-bottom:48px;border-bottom:1px solid rgba(255,255,255,0.04)}
+.demo:last-child{border-bottom:none;margin-bottom:0}
+.demo .desc{font-size:0.85rem;color:var(--dim);margin-bottom:16px;max-width:650px}
+
+/* Side-by-side comparison */
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+@media(max-width:768px){.compare{grid-template-columns:1fr}}
+.compare-card{padding:16px;border-radius:8px;font-size:0.82rem;line-height:1.6;overflow-x:auto}
+.compare-card.css{background:#05080E;border:1px solid rgba(255,255,255,0.06);color:#94A3B8}
+.compare-card.dl{background:rgba(6,182,212,0.04);border:1px solid rgba(6,182,212,0.12);color:#E2E8F0}
+.compare-card .label{font-size:0.65rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--dim);margin-bottom:8px}
+.compare-card .label.css-label{color:#64748B}
+.compare-card .label.dl-label{color:var(--accent)}
+
+/* Output cards */
+.output-area{background:#05080E;border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:24px;display:flex;flex-wrap:wrap;gap:16px;align-items:center;min-height:100px}
+
+/* Button */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 24px;border:none;border-radius:8px;font-family:var(--sans);font-size:0.85rem;font-weight:500;cursor:pointer;transition:all 0.15s;position:relative;overflow:hidden}
+.btn-primary{background:var(--accent);color:#05080E}
+.btn-primary:active{transform:scale(0.96)}
+.btn-secondary{background:rgba(255,255,255,0.06);color:var(--text);border:1px solid rgba(255,255,255,0.08)}
+.btn-secondary:active{transform:scale(0.96)}
+
+/* Stat cards */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;width:100%}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 16px;text-align:center}
+.stat-card .num{font-size:1.5rem;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums}
+.stat-card .lbl{font-size:0.7rem;color:var(--dim);margin-top:2px}
+.stat-card .trend{font-size:0.7rem;font-weight:600;margin-top:4px}
+
+/* Multi-device mockups */
+.devices{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px}
+@media(max-width:768px){.devices{grid-template-columns:1fr;gap:16px}}
+.device{border-radius:10px;padding:16px;border:1px solid var(--border);text-align:center}
+.device .dev-name{font-size:0.65rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--dim);margin-bottom:8px}
+.device .dev-preview{width:100%;height:60px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:var(--dim)}
+.device .dev-label{font-size:0.65rem;color:var(--dim);margin-top:6px;font-family:var(--mono)}
+
+/* Code samples */
+.code-block{background:#05080E;border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:14px 16px;font-family:var(--mono);font-size:0.78rem;line-height:1.7;overflow-x:auto;margin-bottom:12px}
+.code-block .kw{color:#06B6D4}
+.code-block .str{color:#10B981}
+.code-block .num{color:#F59E0B}
+.code-block .cm{color:#475569;font-style:italic}
+.code-block .fn{color:#FF2D78}
+.code-block .prop{color:#8B5CF6}
+
+/* Slider */
+.slider-group{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.slider-group label{font-size:0.78rem;color:var(--dim);min-width:100px}
+.slider-group input[type=range]{flex:1;max-width:200px;appearance:none;height:4px;border-radius:2px;background:rgba(255,255,255,0.1);outline:none}
+.slider-group input[type=range]::-webkit-slider-thumb{appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent);cursor:pointer}
+.slider-group .val{font-size:0.8rem;color:var(--text);min-width:30px;text-align:right}
+
+/* Preview row */
+.preview-row{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.preview-box{width:100px;height:60px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.65rem;color:rgba(255,255,255,0.5);background:#05080E;border:1px solid rgba(255,255,255,0.06)}
+
+/* Demo output panels */
+.demo-out{display:flex;flex-direction:column;gap:12px;margin-top:16px}
+.demo-row{display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+
+/* Platform tags */
+.platform-tags{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.platform-tag{padding:3px 10px;border-radius:20px;font-size:0.65rem;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);color:var(--dim)}
+.platform-tag.active{border-color:var(--accent);color:var(--accent);background:rgba(6,182,212,0.08)}
+
+/* Accessible states */
+.state-bar{display:flex;gap:8px;margin:8px 0}
+.state-pill{padding:4px 12px;border-radius:20px;font-size:0.7rem;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.04);color:var(--dim)}
+.state-pill.active{background:rgba(6,182,212,0.1);border-color:var(--accent);color:var(--accent)}
+.state-pill.stressed{background:rgba(255,45,120,0.1);border-color:#FF2D78;color:#FF2D78}
+
+/* Responsive table */
+.compare-table{width:100%;border-collapse:collapse;font-size:0.82rem;margin:12px 0}
+.compare-table th{text-align:left;padding:8px 12px;color:var(--dim);font-weight:500;border-bottom:1px solid rgba(255,255,255,0.06);font-size:0.75rem;text-transform:uppercase;letter-spacing:0.04em}
+.compare-table td{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.03);vertical-align:top}
+.compare-table .yes{color:#10B981}
+.compare-table .no{color:#64748B}
+.compare-table .kinda{color:#F59E0B}
+
+/* Loading bar */
+.load-bar{width:100%;height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden;position:relative}
+.load-bar .fill{height:100%;background:linear-gradient(90deg,var(--accent),#8B5CF6);border-radius:2px;width:0%;transition:width 0.5s}
+
+/* Footer */
+footer{padding:32px 0;border-top:1px solid rgba(255,255,255,0.04);margin-top:48px;text-align:center;font-size:0.82rem;color:var(--dim)}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Design Lang — The Real Demo</h1>
+  <p>No holograms. No neural thoughts. Just a better way to build interfaces. Five real problems CSS can't solve well, and how Design Lang fixes them.</p>
+</header>
+
+<!-- INTRO: The Actual Problem -->
+<div class="problem-box">
+  <p><strong>⚠️ The Problem:</strong> CSS was built for documents in 1994. Every modern interface pattern — animation, state, multi-device, physics, accessibility — is a hack layered on top. We've gotten good at the hacks, but they still break, they still cost time, and they still exclude users.</p>
+</div>
+<div class="solution-box">
+  <p><strong>✅ Design Lang:</strong> Not a new syntax for the same hacks. A language where these patterns are native — so they work by default, cost less to build, and include every user from the start.</p>
+</div>
+
+<!-- DEMO 1: MULTI-DEVICE — Build once, render everywhere -->
+<div class="demo">
+  <h2>1. Multi-Device from One Source</h2>
+  <p class="desc">A stats dashboard written once in Design Lang renders correctly on phone, tablet, and desktop. No media queries. No breakpoints. No separate layouts to maintain.</p>
+
+  <div class="code-block">
+<span class="cm">// Design Lang — one element, three devices</span>
+element revenue-stats {
+  <span class="kw">layout</span>: <span class="fn">adaptive</span>(
+    <span class="prop">priority</span>: <span class="str">"importance"</span>,
+    <span class="prop">density</span>: <span class="fn">availableSpace</span>()
+  )
+  <span class="kw">content</span>: [
+    { <span class="prop">value</span>: <span class="str">"$128.9M"</span>, <span class="prop">label</span>: <span class="str">"Revenue"</span> },
+    { <span class="prop">value</span>: <span class="num">94.2%</span>, <span class="prop">label</span>: <span class="str">"Uptime"</span> },
+    { <span class="prop">value</span>: <span class="str">"12.4%"</span>, <span class="prop">label</span>: <span class="str">"Growth"</span> }
+  ]
+  <span class="kw">surface</span>: <span class="fn">glass</span>(<span class="prop">blur</span>: <span class="num">12px</span>)
+}
+  </div>
+
+  <div class="devices">
+    <div class="device">
+      <div class="dev-name">📱 Phone (320px)</div>
+      <div class="dev-preview" style="flex-direction:column;gap:6px;height:auto;min-height:100px;padding:8px">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px 12px;width:100%"><div style="font-weight:700;font-size:0.85rem">$128.9M</div><div style="font-size:0.6rem;color:var(--dim)">Revenue</div></div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px 12px;width:100%"><div style="font-weight:700;font-size:0.85rem">94.2%</div><div style="font-size:0.6rem;color:var(--dim)">Uptime</div></div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px 12px;width:100%"><div style="font-weight:700;font-size:0.85rem;color:#10B981">+12.4%</div><div style="font-size:0.6rem;color:var(--dim)">Growth</div></div>
+      </div>
+      <div class="dev-label">Stacked · Full width · Touch-optimized</div>
+    </div>
+    <div class="device">
+      <div class="dev-name">💻 Tablet (768px)</div>
+      <div class="dev-preview" style="flex-direction:row;gap:8px;height:auto;min-height:80px;padding:8px;flex-wrap:wrap">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px 16px;flex:1;min-width:80px"><div style="font-weight:700;font-size:0.9rem">$128.9M</div><div style="font-size:0.6rem;color:var(--dim)">Revenue</div></div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px 16px;flex:1;min-width:80px"><div style="font-weight:700;font-size:0.9rem">94.2%</div><div style="font-size:0.6rem;color:var(--dim)">Uptime</div></div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px 16px;flex:1;min-width:80px"><div style="font-weight:700;font-size:0.9rem;color:#10B981">+12.4%</div><div style="font-size:0.6rem;color:var(--dim)">Growth</div></div>
+      </div>
+      <div class="dev-label">2-row grid · Larger touch targets</div>
+    </div>
+    <div class="device">
+      <div class="dev-name">🖥️ Desktop (1200px)</div>
+      <div class="dev-preview" style="flex-direction:row;gap:12px;height:auto;min-height:60px;padding:8px">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:12px 20px;flex:1;text-align:center"><div style="font-weight:700;font-size:1.2rem">$128.9M</div><div style="font-size:0.65rem;color:var(--dim)">Revenue</div></div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:12px 20px;flex:1;text-align:center"><div style="font-weight:700;font-size:1.2rem">94.2%</div><div style="font-size:0.65rem;color:var(--dim)">Uptime</div></div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:12px 20px;flex:1;text-align:center"><div style="font-weight:700;font-size:1.2rem;color:#10B981">+12.4%</div><div style="font-size:0.65rem;color:var(--dim)">Growth</div></div>
+      </div>
+      <div class="dev-label">Horizontal row · Spacious · Data-rich</div>
+    </div>
+  </div>
+
+  <p style="font-size:0.78rem;color:var(--dim)"><strong>What Design Lang saves:</strong> 3 separate responsive layouts → 1 intent-based declaration. No breakpoint debugging. No layout shift surprises. The runtime figures out the rendering based on available space.</p>
+</div>
+
+<!-- DEMO 2: PHYSICS-NATIVE UI — Buttons that feel right -->
+<div class="demo">
+  <h2>2. UI That Feels Physical (No JS Physics Libraries)</h2>
+  <p class="desc">A button should feel like a button — not a div with a transition. Design Lang has built-in spring physics. Compare the CSS approach vs Design Lang:</p>
+
+  <div class="compare">
+    <div class="compare-card css">
+      <div class="label css-label">CSS Approach (needs JS for real physics)</div>
+<pre>.btn {
+  transition: transform 0.15s ease;
+  /* Cubic-bezier can approximate,
+     but it's fake physics */
+}
+.btn:active {
+  transform: scale(0.95);
+}
+/* Can't do overshoot.
+   Can't do mass-dependent feel.
+   Can't do damping. */</pre>
+    </div>
+    <div class="compare-card dl">
+      <div class="label dl-label">Design Lang (native physics)</div>
+<pre>element button {
+  <span style="color:#8B5CF6">physics</span>: <span style="color:#FF2D78">spring</span>(
+    <span style="color:#F59E0B">stiffness</span>: <span style="color:#F59E0B">180</span>,
+    <span style="color:#F59E0B">damping</span>: <span style="color:#F59E0B">20</span>,
+    <span style="color:#F59E0B">mass</span>: <span style="color:#F59E0B">12g</span>
+  )
+}</pre>
+    </div>
+  </div>
+
+  <div class="output-area" style="flex-direction:column;align-items:flex-start;gap:16px">
+    <p style="font-size:0.75rem;color:var(--dim);margin:0"><strong>Feel the difference:</strong> Click these two buttons. One animates. The other <em>simulates</em>.</p>
+    <div style="display:flex;gap:16px;flex-wrap:wrap">
+      <div style="text-align:center">
+        <button class="btn btn-secondary" id="cssBtn" style="transition:transform 0.1s ease">CSS Button</button>
+        <p style="font-size:0.6rem;color:var(--dim);margin:4px 0 0">cubic-bezier transition</p>
+      </div>
+      <div style="text-align:center">
+        <button class="btn btn-primary" id="physBtn">Physics Button</button>
+        <p style="font-size:0.6rem;color:var(--dim);margin:4px 0 0">spring(stiffness: 180, damping: 20)</p>
+      </div>
+    </div>
+    <div class="slider-group" style="width:100%">
+      <label>Stiffness</label>
+      <input type="range" min="50" max="400" value="180" id="stiffSlider">
+      <span class="val" id="stiffVal">180</span>
+      <label>Damping</label>
+      <input type="range" min="5" max="50" value="20" id="dampSlider">
+      <span class="val" id="dampVal">20</span>
+    </div>
+    <div class="code-block" id="livePhysSyntax" style="font-size:0.7rem;margin:0;padding:8px 12px;width:100%">
+<span class="kw">physics</span>: <span class="fn">spring</span>(<span class="prop">stiffness</span>: <span class="num">180</span>, <span class="prop">damping</span>: <span class="num">20</span>, <span class="prop">mass</span>: <span class="num">12g</span>)
+    </div>
+  </div>
+
+  <p style="font-size:0.78rem;color:var(--dim);margin-top:12px"><strong>What Design Lang saves:</strong> No GreenSock, no Framer Motion, no spring libraries. Physics is built into the language — the button just <em>feels</em> right without importing a single dependency.</p>
+</div>
+
+<!-- DEMO 3: COGNITIVE-LOAD AWARE — Accessibility that adapts -->
+<div class="demo">
+  <h2>3. Accessibility That Adapts to the User (Not Just WCAG Checkboxes)</h2>
+  <p class="desc">A form that automatically simplifies when the user is stressed or distracted. No manual toggle. The interface reads the room.</p>
+
+  <div class="compare">
+    <div class="compare-card css">
+      <div class="label css-label">CSS Approach (manual only)</div>
+<pre>/* One static layout */
+.form-group { /* ... */ }
+.error { color: red; }
+/* No awareness of user state.
+   No adaptation.
+   You'd need JS + state mgmt
+   + a11y lib to do this. */</pre>
+    </div>
+    <div class="compare-card dl">
+      <div class="label dl-label">Design Lang (adaptive by nature)</div>
+<pre>element checkout-form {
+  <span style="color:#8B5CF6">layout</span>: <span style="color:#FF2D78">adaptive</span>(
+    <span style="color:#F59E0B">complexity</span>: <span style="color:#F59E0B">user.cognitive_load</span>
+    <span style="color:#777">// &lt; 3: full layout with options</span>
+    <span style="color:#777">// 3-6: simplified, less choices</span>
+    <span style="color:#777">// &gt; 6: one thing at a time</span>
+  )
+  <span style="color:#8B5CF6">contrast</span>: <span style="color:#FF2D78">auto</span>(<span style="color:#F59E0B">base</span>: <span style="color:#F59E0B">WCAG.AAA</span>)
+  <span style="color:#8B5CF6">touch_targets</span>: <span style="color:#F59E0B">48px</span> <span style="color:#777">// minimum, always</span>
+}</pre>
+    </div>
+  </div>
+
+  <div class="output-area" style="flex-direction:column;align-items:flex-start;gap:12px">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;width:100%">
+      <span style="font-size:0.75rem;color:var(--dim)">Simulate user state:</span>
+      <button class="btn btn-secondary" id="stateCalm" style="font-size:0.75rem;padding:6px 14px">😌 Calm</button>
+      <button class="btn btn-secondary" id="stateBusy" style="font-size:0.75rem;padding:6px 14px">😤 Stressed</button>
+      <button class="btn btn-secondary" id="stateDistracted" style="font-size:0.75rem;padding:6px 14px">📱 Distracted</button>
+    </div>
+    <div id="adaptiveForm" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;transition:all 0.4s">
+      <div id="formHeader" style="font-size:0.9rem;font-weight:600;margin-bottom:12px;transition:all 0.4s">Complete your purchase</div>
+      <div id="formFields" style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <label style="font-size:0.75rem;color:var(--dim)">Email</label>
+          <input type="email" value="david@empire.io" style="background:#05080E;border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:10px 12px;color:var(--text);font-size:0.85rem;font-family:var(--sans);outline:none">
+        </div>
+        <div id="extraFields" style="display:flex;flex-direction:column;gap:8px;transition:all 0.4s">
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <label style="font-size:0.75rem;color:var(--dim)">Address</label>
+            <input type="text" value="123 Empire Lane" style="background:#05080E;border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:10px 12px;color:var(--text);font-size:0.85rem;font-family:var(--sans);outline:none">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="addressExtras">
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <label style="font-size:0.75rem;color:var(--dim)">City</label>
+              <input type="text" value="Dublin" style="background:#05080E;border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:10px 12px;color:var(--text);font-size:0.85rem;font-family:var(--sans);outline:none">
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <label style="font-size:0.75rem;color:var(--dim)">Postcode</label>
+              <input type="text" value="D01 XY12" style="background:#05080E;border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:10px 12px;color:var(--text);font-size:0.85rem;font-family:var(--sans);outline:none">
+            </div>
+          </div>
+        </div>
+        <div id="promoField" style="transition:all 0.4s">
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <label style="font-size:0.75rem;color:var(--dim)">Promo Code</label>
+            <input type="text" placeholder="Optional" style="background:#05080E;border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:10px 12px;color:var(--text);font-size:0.85rem;font-family:var(--sans);outline:none">
+          </div>
+        </div>
+        <div id="extrasSection" style="display:flex;flex-direction:column;gap:6px;transition:all 0.4s">
+          <label style="font-size:0.75rem;color:var(--dim)">Extras</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <label style="font-size:0.7rem;display:flex;align-items:center;gap:4px"><input type="checkbox"> Express delivery</label>
+            <label style="font-size:0.7rem;display:flex;align-items:center;gap:4px"><input type="checkbox"> Gift wrap</label>
+            <label style="font-size:0.7rem;display:flex;align-items:center;gap:4px"><input type="checkbox"> Insurance</label>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-primary" style="margin-top:12px;width:100%">Pay Now</button>
+    </div>
+    <div id="accessState" style="font-size:0.7rem;color:var(--dim);padding:6px 12px;background:rgba(255,255,255,0.03);border-radius:6px;width:100%">Current mode: 😌 Calm — Full layout with all options</div>
+  </div>
+
+  <p style="font-size:0.78rem;color:var(--dim);margin-top:12px"><strong>What Design Lang saves:</strong> No separate "simplified mode" to build and maintain. No JS state management to track user stress. The interface adapts as a first-class feature — accessibility isn't a mode, it's the default.</p>
+</div>
+
+<!-- DEMO 4: ONE SOURCE OF TRUTH — No separate mobile/desktop/tablet code -->
+<div class="demo">
+  <h2>4. The Cost of Fragmentation (CSS vs Design Lang)</h2>
+  <p class="desc">Every breakpoint, every media query, every separate mobile layout is technical debt. Here's what it costs to maintain a simple 3-card layout across devices:</p>
+
+  <table class="compare-table">
+    <tr>
+      <th></th>
+      <th>CSS</th>
+      <th>Design Lang</th>
+    </tr>
+    <tr>
+      <td>Lines of code for responsive layout</td>
+      <td>~85 lines (CSS + HTML + media queries)</td>
+      <td>~12 lines (one declaration)</td>
+    </tr>
+    <tr>
+      <td>Breakpoints to maintain</td>
+      <td>3-5 (mobile, tablet, desktop, xl)</td>
+      <td>0 (runtime adapts)</td>
+    </tr>
+    <tr>
+      <td>Layout bug surface area</td>
+      <td>High (margin collapse, overflow, stacking)</td>
+      <td>None (runtime handles layout)</td>
+    </tr>
+    <tr>
+      <td>New device support</td>
+      <td>Add another breakpoint, test everything</td>
+      <td>Works automatically</td>
+    </tr>
+    <tr>
+      <td>Touch target sizing</td>
+      <td>Manual @media (pointer: coarse)</td>
+      <td>Automatic (detects input type)</td>
+    </tr>
+    <tr>
+      <td>Reduced motion support</td>
+      <td>@media (prefers-reduced-motion)</td>
+      <td>Native — every element has a "calm" state</td>
+    </tr>
+  </table>
+
+  <div class="code-block" style="margin-top:12px">
+<span class="cm">// Design Lang — responsive as a side effect, not a feature</span>
+element card-grid {
+  <span class="kw">layout</span>: <span class="fn">bento</span>(
+    <span class="prop">min_child_width</span>: <span class="num">280px</span>,
+    <span class="prop">gap</span>: <span class="num">16px</span>
+  )
+  <span class="cm">// That's it. The runtime handles the rest.</span>
+  <span class="cm">// 320px phone: 1 column, stacked, full-width cards</span>
+  <span class="cm">// 768px tablet: 2 columns, comfortable tap targets</span>
+  <span class="cm">// 1200px desktop: 3-4 columns, spacious layout</span>
+  <span class="cm">// New device tomorrow: works automatically</span>
+}
+  </div>
+</div>
+
+<!-- DEMO 5: STATE MANAGEMENT IS FREE -->
+<div class="demo">
+  <h2>5. Reactive State Without a State Library</h2>
+  <p class="desc">In CSS, a button's "loading" state requires: a class toggle, a CSS rule for that class, a loader element, and JS to orchestrate it. In Design Lang, it's a built-in state.</p>
+
+  <div class="compare">
+    <div class="compare-card css">
+      <div class="label css-label">CSS + HTML + JS (45 lines)</div>
+<pre>/* HTML */
+&lt;button class="save-btn"&gt;
+  &lt;span class="label"&gt;Save&lt;/span&gt;
+  &lt;span class="spinner" hidden&gt;&lt;/span&gt;
+&lt;/button&gt;
+
+/* CSS */
+.save-btn.loading .label { display:none }
+.save-btn.loading .spinner { display:block }
+
+/* JS */
+btn.classList.toggle('loading');
+// Also need to disable, also need
+// to handle success/error states,
+// also need to manage timing...
+// It never ends.</pre>
+    </div>
+    <div class="compare-card dl">
+      <div class="label dl-label">Design Lang (12 lines, all states)</div>
+<pre>element save-button {
+  <span style="color:#8B5CF6">states</span>: [
+    <span style="color:#10B981">idle</span>,
+    <span style="color:#F59E0B">loading</span>,
+    <span style="color:#10B981">success</span>,
+    <span style="color:#FF2D78">error</span>
+  ]
+  <span style="color:#8B5CF6">state</span>: <span style="color:#FF2D78">binding</span>(<span style="color:#F59E0B">data.saving</span>)
+  <span style="color:#777">// loading: spinner + disabled</span>
+  <span style="color:#777">// success: checkmark + auto-revert</span>
+  <span style="color:#777">// error: shake + message</span>
+}</pre>
+    </div>
+  </div>
+
+  <div class="output-area" style="flex-direction:column;align-items:flex-start;gap:12px">
+    <p style="font-size:0.75rem;color:var(--dim);margin:0"><strong>Click to cycle through states:</strong> One button, 4 states, zero state management code.</p>
+    <button class="btn btn-primary" id="stateBtn" style="min-width:140px;justify-content:center">
+      <span id="stateBtnLabel">Save</span>
+      <span id="stateBtnIcon" style="font-size:1rem">→</span>
+    </button>
+    <div id="stateCode" class="code-block" style="font-size:0.7rem;margin:0;padding:8px 12px;width:100%">
+<span class="kw">state</span>: <span class="str">"idle"</span>
+    </div>
+  </div>
+
+  <p style="font-size:0.78rem;color:var(--dim);margin-top:12px"><strong>What Design Lang saves:</strong> No Redux. No Zustand. No useState. No class toggles. States are a native element property — every element is state-aware by default.</p>
+</div>
+
+<!-- CLOSING -->
+<div class="problem-box">
+  <p><strong>Design Lang isn't about rendering to "thought space."</strong> It's about not writing 85 lines of CSS to center a div, not wiring up a state library for a button that has 4 states, not maintaining 3 separate layouts for the same content, not importing a physics engine to make a button feel clickable, and not hacking accessibility on as an afterthought.</p>
+</div>
+
+<footer>
+  <p><strong>Design Lang — The Real Demo</strong> · Empire Creative · May 2026</p>
+  <p style="font-size:0.75rem;margin-top:4px">Not a new syntax for the same hacks. A language where these patterns are native.</p>
+</footer>
+
+<script>
+// Physics button
+const physBtn = document.getElementById('physBtn');
+let physTimeout;
+physBtn.addEventListener('mousedown', () => {
+  const s = parseInt(document.getElementById('stiffSlider').value);
+  const d = parseInt(document.getElementById('dampSlider').value);
+  physBtn.style.transition = 'none';
+  physBtn.style.transform = `scale(${0.93 + (s/400)*0.04})`;
+  clearTimeout(physTimeout);
+  physTimeout = setTimeout(() => {
+    physBtn.style.transition = `transform ${d/100}s cubic-bezier(0.34, ${1.56 - (d/50)*0.6}, 0.64, 1)`;
+    physBtn.style.transform = 'scale(1)';
+    // Overshoot simulation
+    setTimeout(() => {
+      physBtn.style.transition = `transform ${d/150}s ease-out`;
+      physBtn.style.transform = 'scale(1.02)';
+      setTimeout(() => {
+        physBtn.style.transition = `transform ${d/200}s ease-in`;
+        physBtn.style.transform = 'scale(1)';
+      }, d * 2);
+    }, d * 3);
+  }, 50);
+});
+
+// CSS button (simple)
+document.getElementById('cssBtn').addEventListener('mousedown', () => {
+  document.getElementById('cssBtn').style.transform = 'scale(0.95)';
+});
+document.getElementById('cssBtn').addEventListener('mouseup', () => {
+  document.getElementById('cssBtn').style.transform = 'scale(1)';
+});
+document.getElementById('cssBtn').addEventListener('mouseleave', () => {
+  document.getElementById('cssBtn').style.transform = 'scale(1)';
+});
+
+// Physics sliders
+document.getElementById('stiffSlider').addEventListener('input', function() {
+  document.getElementById('stiffVal').textContent = this.value;
+  updatePhysSyntax();
+});
+document.getElementById('dampSlider').addEventListener('input', function() {
+  document.getElementById('dampVal').textContent = this.value;
+  updatePhysSyntax();
+});
+function updatePhysSyntax() {
+  const s = document.getElementById('stiffSlider').value;
+  const d = document.getElementById('dampSlider').value;
+  document.getElementById('livePhysSyntax').innerHTML =
+    `<span style="color:#8B5CF6">physics</span>: <span style="color:#FF2D78">spring</span>(<span style="color:#F59E0B">stiffness</span>: <span style="color:#F59E0B">${s}</span>, <span style="color:#F59E0B">damping</span>: <span style="color:#F59E0B">${d}</span>, <span style="color:#F59E0B">mass</span>: <span style="color:#F59E0B">12g</span>)`;
+}
+
+// Adaptive form
+const formHeader = document.getElementById('formHeader');
+const extraFields = document.getElementById('extraFields');
+const promoField = document.getElementById('promoField');
+const extrasSection = document.getElementById('extrasSection');
+const accessState = document.getElementById('accessState');
+const adaptiveForm = document.getElementById('adaptiveForm');
+
+document.getElementById('stateCalm').addEventListener('click', () => setState('calm'));
+document.getElementById('stateBusy').addEventListener('click', () => setState('stressed'));
+document.getElementById('stateDistracted').addEventListener('click', () => setState('distracted'));
+
+function setState(state) {
+  if (state === 'calm') {
+    extraFields.style.opacity = '1';
+    extraFields.style.maxHeight = '200px';
+    extraFields.style.overflow = 'visible';
+    promoField.style.opacity = '1';
+    promoField.style.maxHeight = '100px';
+    extrasSection.style.opacity = '1';
+    extrasSection.style.maxHeight = '100px';
+    formHeader.textContent = 'Complete your purchase';
+    adaptiveForm.style.borderColor = 'rgba(255,255,255,0.06)';
+    accessState.textContent = '😌 Calm — Full layout with all options';
+  } else if (state === 'stressed') {
+    extraFields.style.opacity = '0.5';
+    extraFields.style.maxHeight = '200px';
+    extraFields.style.overflow = 'visible';
+    promoField.style.opacity = '0';
+    promoField.style.maxHeight = '0';
+    promoField.style.overflow = 'hidden';
+    extrasSection.style.opacity = '0';
+    extrasSection.style.maxHeight = '0';
+    extrasSection.style.overflow = 'hidden';
+    formHeader.textContent = 'Complete your purchase (simplified)';
+    adaptiveForm.style.borderColor = 'rgba(255,45,120,0.3)';
+    accessState.textContent = '😤 Stressed — Simplified: non-essential fields hidden';
+  } else if (state === 'distracted') {
+    extraFields.style.opacity = '0';
+    extraFields.style.maxHeight = '0';
+    extraFields.style.overflow = 'hidden';
+    promoField.style.opacity = '0';
+    promoField.style.maxHeight = '0';
+    promoField.style.overflow = 'hidden';
+    extrasSection.style.opacity = '0';
+    extrasSection.style.maxHeight = '0';
+    extrasSection.style.overflow = 'hidden';
+    formHeader.textContent = 'Focus mode — one step at a time';
+    adaptiveForm.style.borderColor = '#F59E0B';
+    accessState.textContent = '📱 Distracted — Focus mode: only essential fields shown';
+  }
+}
+
+// State button cycle
+const stateBtn = document.getElementById('stateBtn');
+const stateLabel = document.getElementById('stateBtnLabel');
+const stateIcon = document.getElementById('stateBtnIcon');
+const stateCode = document.getElementById('stateCode');
+const states = ['idle', 'loading', 'success', 'error'];
+let stateIdx = 0;
+
+stateBtn.addEventListener('click', () => {
+  stateIdx = (stateIdx + 1) % states.length;
+  const s = states[stateIdx];
+
+  // Reset
+  stateBtn.style.transition = 'all 0.3s';
+  stateBtn.style.transform = 'scale(1)';
+  stateBtn.style.background = '';
+  stateBtn.style.color = '';
+
+  if (s === 'idle') {
+    stateLabel.textContent = 'Save';
+    stateIcon.textContent = '→';
+    stateIcon.style.animation = 'none';
+    stateCode.innerHTML = '<span style="color:#06B6D4">state</span>: <span style="color:#10B981">"idle"</span>';
+  } else if (s === 'loading') {
+    stateLabel.textContent = 'Saving...';
+    stateIcon.textContent = '⟳';
+    stateIcon.style.animation = 'spin 0.8s linear infinite';
+    stateCode.innerHTML = '<span style="color:#06B6D4">state</span>: <span style="color:#F59E0B">"loading"</span> → <span style="color:#475569">spinner + disabled</span>';
+  } else if (s === 'success') {
+    stateLabel.textContent = 'Saved!';
+    stateIcon.textContent = '✓';
+    stateIcon.style.animation = 'none';
+    stateBtn.style.background = '#10B981';
+    stateBtn.style.color = '#05080E';
+    stateCode.innerHTML = '<span style="color:#06B6D4">state</span>: <span style="color:#10B981">"success"</span> → <span style="color:#475569">checkmark, auto-reverts to idle</span>';
+    setTimeout(() => {
+      stateIdx = 0;
+      stateLabel.textContent = 'Save';
+      stateIcon.textContent = '→';
+      stateBtn.style.background = '';
+      stateBtn.style.color = '';
+      stateCode.innerHTML = '<span style="color:#06B6D4">state</span>: <span style="color:#10B981">"idle"</span>';
+    }, 1500);
+  } else if (s === 'error') {
+    stateLabel.textContent = 'Failed!';
+    stateIcon.textContent = '✕';
+    stateIcon.style.animation = 'none';
+    stateBtn.style.background = '#FF2D78';
+    stateBtn.style.color = '#fff';
+    stateBtn.style.animation = 'shake 0.3s ease';
+    stateCode.innerHTML = '<span style="color:#06B6D4">state</span>: <span style="color:#FF2D78">"error"</span> → <span style="color:#475569">shake + error message</span>';
+    setTimeout(() => {
+      stateBtn.style.animation = '';
+    }, 300);
+  }
+});
+
+// Spin keyframe
+const styleSheet = document.createElement('style');
+styleSheet.textContent = `@keyframes spin{to{transform:rotate(360deg)}} @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-4px)}40%{transform:translateX(4px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}`;
+document.head.appendChild(styleSheet);
+</script>
+</body>
+</html>
