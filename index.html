@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design Lang — Interactive Prototype v0.1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=Inter:wght@300..800&family=JetBrains+Mono:wght@300..700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   DESIGN LANG PROTOTYPE — Complete Design System
+   ============================================================ */
+
+/* --- Reset & Base --- */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px}
+body{
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  background:#05080E;
+  color:#F1F5F9;
+  min-height:100vh;
+  overflow-x:hidden;
+  cursor: none;
+}
+a{color:#06B6D4;text-decoration:none}
+a:hover{color:#00E5FF}
+::selection{background:rgba(6,182,212,0.3);color:#fff}
+
+/* --- Custom Cursor --- */
+.cursor-glow{
+  position:fixed;pointer-events:none;z-index:99999;
+  width:40px;height:40px;border-radius:50%;
+  background:radial-gradient(circle,rgba(6,182,212,0.25) 0%,transparent 70%);
+  transform:translate(-50%,-50%);
+  transition:opacity 0.3s,width 0.3s,height 0.3s;
+  mix-blend-mode:screen;
+}
+.cursor-dot{
+  position:fixed;pointer-events:none;z-index:99999;
+  width:6px;height:6px;border-radius:50%;
+  background:#06B6D4;
+  transform:translate(-50%,-50%);
+  transition:opacity 0.15s;
+  box-shadow:0 0 12px rgba(6,182,212,0.6),0 0 24px rgba(6,182,212,0.2);
+}
+
+/* --- Grain Overlay --- */
+.grain-overlay{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  pointer-events:none;z-index:99998;
+  opacity:0.025;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat:repeat;
+  background-size:256px 256px;
+  mix-blend-mode:overlay;
+}
+
+/* --- Scrollbar --- */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:#05080E}
+::-webkit-scrollbar-thumb{background:rgba(6,182,212,0.3);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:rgba(6,182,212,0.5)}
+
+/* --- Typography --- */
+h1,h2,h3,h4,h5,h6{font-family:'Space Grotesk',system-ui,sans-serif;font-weight:600;letter-spacing:-0.02em;line-height:1.1}
+h1{font-size:clamp(2rem,5vw,4rem)}
+h2{font-size:clamp(1.5rem,3vw,2.5rem)}
+h3{font-size:clamp(1.2rem,1.8vw,1.8rem)}
+code,pre{font-family:'JetBrains Mono',monospace}
+p{line-height:1.6;color:#94A3B8}
+.subtitle{font-size:clamp(0.9rem,1.1vw,1.1rem);color:#64748B;max-width:600px;line-height:1.5}
+
+/* --- Glass Utility --- */
+.glass{
+  background:rgba(15,23,42,0.7);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:16px;
+}
+.glass-sm{
+  background:rgba(15,23,42,0.5);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,0.04);
+  border-radius:12px;
+}
+
+/* --- Layout --- */
+.app-container{
+  max-width:1440px;margin:0 auto;padding:24px;
+  display:flex;flex-direction:column;gap:48px;
+}
+@media(max-width:768px){.app-container{padding:16px;gap:32px}}
+
+/* --- HEADER --- */
+.header{
+  text-align:center;padding:48px 24px 24px;
+  position:relative;
+}
+.header::after{
+  content:'';position:absolute;bottom:0;left:20%;right:20%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(6,182,212,0.3),transparent);
+}
+.header-badge{
+  display:inline-block;
+  font-family:'JetBrains Mono',monospace;font-size:0.7rem;
+  padding:4px 12px;border-radius:100px;
+  background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.2);
+  color:#06B6D4;margin-bottom:16px;letter-spacing:0.05em;
+  text-transform:uppercase;
+}
+.header h1{background:linear-gradient(135deg,#F1F5F9 0%,#06B6D4 50%,#8B5CF6 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.header .subtitle{margin:12px auto 0}
+
+/* --- MAIN EDITOR+PREVIEW LAYOUT --- */
+.editor-preview{
+  display:grid;
+  grid-template-columns:38% 1fr;
+  gap:20px;min-height:480px;
+}
+@media(max-width:900px){.editor-preview{grid-template-columns:1fr;min-height:auto}}
+
+/* --- CODE EDITOR --- */
+.editor-panel{
+  background:#0A0E1A;
+  border-radius:12px;border:1px solid rgba(255,255,255,0.06);
+  overflow:hidden;display:flex;flex-direction:column;
+}
+.editor-header{
+  display:flex;align-items:center;gap:8px;
+  padding:12px 16px;
+  border-bottom:1px solid rgba(255,255,255,0.04);
+  background:rgba(0,0,0,0.2);
+}
+.editor-dot{width:10px;height:10px;border-radius:50%}
+.editor-dot:nth-child(1){background:#FF5F56}
+.editor-dot:nth-child(2){background:#FFBD2E}
+.editor-dot:nth-child(3){background:#27C93F}
+.editor-label{font-size:0.7rem;color:#64748B;margin-left:8px;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.05em}
+.editor-body{
+  padding:20px;overflow-y:auto;flex:1;
+  font-family:'JetBrains Mono',monospace;font-size:0.82rem;line-height:1.7;
+  white-space:pre-wrap;tab-size:2;
+  color:#E2E8F0;min-height:360px;max-height:520px;
+}
+.editor-body .kw{color:#06B6D4}     /* keywords */
+.editor-body .fn{color:#C084FC}     /* functions */
+.editor-body .str{color:#34D399}    /* strings */
+.editor-body .num{color:#FBBF24}    /* numbers */
+.editor-body .cm{color:#64748B;font-style:italic} /* comments */
+.editor-body .pr{color:#F472B6}     /* properties */
+.editor-body .op{color:#F59E0B}     /* operators */
+.editor-body .cp{color:#FB923C}     /* compose */
+.editor-body .tag{color:#22D3EE}    /* element tag */
+.editor-body .un{color:#94A3B8}     /* units */
+
+/* --- PREVIEW PANEL --- */
+.preview-panel{
+  background:radial-gradient(ellipse at 50% 50%,#0F1A2E 0%,#05080E 100%);
+  border-radius:12px;border:1px solid rgba(255,255,255,0.06);
+  overflow:hidden;display:flex;flex-direction:column;
+  position:relative;
+}
+.preview-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;
+  border-bottom:1px solid rgba(255,255,255,0.04);
+  background:rgba(0,0,0,0.2);
+}
+.preview-label{font-size:0.7rem;color:#64748B;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.05em}
+.preview-status{font-size:0.65rem;color:#34D399;font-family:'JetBrains Mono',monospace;display:flex;align-items:center;gap:6px}
+.preview-status::before{content:'';width:6px;height:6px;border-radius:50%;background:#34D399;animation:pulse-dot 2s infinite}
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:0.4}}
+.preview-stage{
+  flex:1;display:flex;align-items:center;justify-content:center;
+  position:relative;perspective:1000px;overflow:hidden;
+  min-height:360px;
+}
+
+/* --- Live Render Card --- */
+.render-card{
+  width:240px;height:280px;border-radius:20px;
+  background:linear-gradient(145deg,#FFF5E6 0%,#F5E6D3 50%,#EDE0D4 100%);
+  border:1px solid rgba(255,255,255,0.3);
+  position:relative;overflow:hidden;
+  transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  cursor: pointer;
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.4),
+    0 0 0 1px rgba(255,255,255,0.1) inset,
+    0 1px 0 rgba(255,255,255,0.2) inset;
+}
+.render-card::before{
+  content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;
+  background:radial-gradient(
+    circle at var(--spec-x,50%) var(--spec-y,50%),
+    rgba(255,255,255,0.4) 0%,
+    rgba(255,255,255,0.1) 30%,
+    transparent 60%
+  );
+  pointer-events:none;mix-blend-mode:overlay;
+}
+.render-card .card-content{
+  position:relative;z-index:2;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  height:100%;padding:24px;text-align:center;
+}
+.render-card .card-icon{
+  width:64px;height:64px;border-radius:16px;
+  background:linear-gradient(135deg,#06B6D4,#8B5CF6);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:16px;font-size:28px;
+  box-shadow:0 8px 32px rgba(6,182,212,0.3);
+}
+.render-card .card-title{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;color:#1A1A2E;margin-bottom:8px}
+.render-card .card-desc{font-size:0.8rem;color:#64748B;line-height:1.4}
+.render-card.interacting{transition:transform 0.05s}
+.render-card.released{transition:transform 0.6s cubic-bezier(0.34,1.56,0.64,1)}
+.render-card.pressed{transform:scale(0.95) translateY(4px)}
+
+/* Code Snippet Overlay */
+.code-overlay{
+  position:absolute;bottom:0;left:0;right:0;
+  background:rgba(5,8,14,0.85);backdrop-filter:blur(8px);
+  padding:12px 16px;font-family:'JetBrains Mono',monospace;font-size:0.65rem;
+  border-top:1px solid rgba(255,255,255,0.06);
+  color:#94A3B8;line-height:1.6;
+  z-index:10;
+}
+.code-overlay .dl-kw{color:#06B6D4}
+.code-overlay .dl-fn{color:#C084FC}
+.code-overlay .dl-str{color:#34D399}
+.code-overlay .dl-num{color:#FBBF24}
+.code-overlay .dl-pr{color:#F472B6}
+.code-overlay .dl-cm{color:#475569}
+
+/* --- TREND CARDS SECTION --- */
+.section-title{text-align:center;margin-bottom:8px}
+.section-subtitle{text-align:center;color:#64748B;margin-bottom:32px;font-size:0.95rem}
+
+.trend-cards-grid{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:16px;
+}
+@media(max-width:1200px){.trend-cards-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:768px){.trend-cards-grid{grid-template-columns:1fr}}
+
+.trend-section{margin-top:16px}
+.trend-card{
+  background:rgba(15,23,42,0.6);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:16px;overflow:hidden;
+  transition:transform 0.3s,box-shadow 0.3s;
+}
+.trend-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 20px 60px rgba(0,0,0,0.3),0 0 0 1px rgba(6,182,212,0.1);
+}
+.trend-card-header{
+  padding:16px 20px 12px;
+  border-bottom:1px solid rgba(255,255,255,0.04);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.trend-card-header h3{font-size:0.95rem;font-weight:600}
+.trend-badge{
+  font-size:0.6rem;font-family:'JetBrains Mono',monospace;
+  padding:2px 8px;border-radius:6px;
+  background:rgba(6,182,212,0.1);color:#06B6D4;
+  border:1px solid rgba(6,182,212,0.15);
+}
+.trend-code{
+  background:#05080E;padding:12px 16px;
+  font-family:'JetBrains Mono',monospace;font-size:0.7rem;line-height:1.6;
+  color:#94A3B8;overflow-x:auto;
+  border-bottom:1px solid rgba(255,255,255,0.04);
+}
+.trend-demo{padding:24px;min-height:160px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:12px;position:relative;overflow:hidden}
+
+/* --- Material Card Demos --- */
+.material-card{
+  width:100px;height:110px;border-radius:12px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:6px;font-size:0.7rem;font-family:'Space Grotesk',sans-serif;font-weight:500;
+  position:relative;overflow:hidden;
+  transition:transform 0.3s,box-shadow 0.3s;
+  cursor:pointer;
+}
+.material-card:hover{transform:translateY(-4px) scale(1.02)}
+.material-card .mat-icon{font-size:24px}
+.material-card .mat-label{color:rgba(255,255,255,0.8)}
+
+.mat-glass{
+  background:rgba(255,255,255,0.05);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,0.1);
+  box-shadow:0 0 20px rgba(6,182,212,0.05);
+}
+.mat-ceramic{
+  background:linear-gradient(145deg,#FFF5E6,#F5E6D3,#EDE0D4);
+  border:1px solid rgba(255,255,255,0.3);
+  color:#2D1B36;
+  box-shadow:
+    0 4px 20px rgba(0,0,0,0.15),
+    0 0 0 1px rgba(255,255,255,0.2) inset,
+    0 1px 0 rgba(255,255,255,0.3) inset;
+}
+.mat-ceramic::before{
+  content:'';position:absolute;top:-30%;left:-30%;width:160%;height:160%;
+  background:radial-gradient(circle at var(--mcx,50%) var(--mcy,50%),
+    rgba(255,255,255,0.5) 0%,transparent 50%);
+  pointer-events:none;mix-blend-mode:overlay;
+}
+.mat-metal{
+  background:linear-gradient(180deg,#D4D8DD 0%,#A8AEB5 25%,#C8CDD2 50%,#90989F 75%,#B0B5BA 100%);
+  border:1px solid rgba(255,255,255,0.2);
+  color:#1A1A2E;
+  box-shadow:
+    0 4px 20px rgba(0,0,0,0.2),
+    0 0 0 1px rgba(255,255,255,0.1) inset;
+}
+.mat-metal::before{
+  content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+  background:repeating-linear-gradient(
+    0deg,
+    transparent 0px,transparent 1px,
+    rgba(255,255,255,0.05) 1px,rgba(255,255,255,0.05) 2px,
+    transparent 2px,transparent 4px
+  );
+  pointer-events:none;
+}
+.mat-metal::after{
+  content:'';position:absolute;top:0;left:var(--msx,50%);width:2px;height:100%;
+  background:linear-gradient(180deg,rgba(255,255,255,0) 0%,rgba(255,255,255,0.6) 50%,rgba(255,255,255,0) 100%);
+  pointer-events:none;transition:left 0.05s;
+}
+.mat-textile{
+  background:linear-gradient(135deg,#D4A76A,#C49A6C,#B8895C);
+  border:1px solid rgba(255,255,255,0.1);
+  color:#1A0E08;
+}
+.mat-textile::before{
+  content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+  background-image:
+    repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.06) 3px,rgba(0,0,0,0.06) 4px),
+    repeating-linear-gradient(90deg,transparent,transparent 3px,rgba(0,0,0,0.06) 3px,rgba(0,0,0,0.06) 4px);
+  pointer-events:none;
+}
+.mat-textile::after{
+  content:'';position:absolute;top:-20%;left:-20%;width:140%;height:140%;
+  background:radial-gradient(circle at 30% 40%,rgba(255,255,255,0.15),transparent 60%);
+  pointer-events:none;
+}
+
+/* --- SPATIAL DEPTH --- */
+.spatial-stage{
+  perspective:800px;width:100%;min-height:180px;
+  display:flex;align-items:center;justify-content:center;
+  gap:20px;position:relative;
+}
+.spatial-card{
+  width:120px;height:80px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Space Grotesk',sans-serif;font-size:0.7rem;font-weight:600;
+  transition:transform 0.1s,opacity 0.3s,filter 0.3s;
+  border:1px solid rgba(255,255,255,0.06);
+  background:rgba(15,23,42,0.6);backdrop-filter:blur(8px);
+  text-align:center;padding:8px;
+  cursor:default;user-select:none;
+}
+.spatial-card .badge{
+  position:absolute;top:-8px;right:-8px;
+  font-size:0.55rem;padding:2px 6px;border-radius:4px;
+  background:#06B6D4;color:#05080E;font-family:'JetBrains Mono',monospace;
+}
+.spatial-close{
+  transform:translateZ(60px) scale(1.08);
+  border-color:rgba(6,182,212,0.2);
+  box-shadow:0 0 30px rgba(6,182,212,0.05);
+  z-index:3;
+}
+.spatial-mid{
+  transform:translateZ(0px);
+  border-color:rgba(255,255,255,0.04);
+  z-index:2;
+}
+.spatial-far{
+  transform:translateZ(-30px) scale(0.85);
+  filter:blur(1px);opacity:0.6;
+  border-color:rgba(255,255,255,0.02);
+  z-index:1;
+}
+
+/* --- PHYSICS DEMO --- */
+.physics-btn{
+  width:120px;height:60px;border-radius:14px;
+  border:none;outline:none;
+  font-family:'Space Grotesk',sans-serif;font-size:0.85rem;font-weight:600;
+  background:linear-gradient(135deg,#06B6D4,#0EA5E9);
+  color:#fff;
+  cursor:pointer;
+  position:relative;
+  box-shadow:0 8px 32px rgba(6,182,212,0.25),0 0 0 1px rgba(255,255,255,0.1) inset;
+  transition:none;
+  user-select:none;-webkit-tap-highlight-color:transparent;
+}
+.physics-btn.pressed{box-shadow:0 2px 8px rgba(6,182,212,0.15),0 0 0 1px rgba(255,255,255,0.05) inset}
+.physics-btn.releasing{transition:transform 0.6s cubic-bezier(0.34,1.56,0.64,1)}
+.physics-controls{
+  display:flex;flex-direction:column;gap:8px;width:100%;
+  margin-top:8px;
+}
+.physics-controls label{
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:0.7rem;color:#94A3B8;font-family:'JetBrains Mono',monospace;
+}
+.physics-controls input[type=range]{
+  width:100%;-webkit-appearance:none;appearance:none;
+  height:4px;border-radius:2px;
+  background:rgba(255,255,255,0.1);
+  outline:none;
+}
+.physics-controls input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  width:14px;height:14px;border-radius:50%;
+  background:#06B6D4;cursor:pointer;
+  border:2px solid rgba(255,255,255,0.2);
+  box-shadow:0 0 12px rgba(6,182,212,0.3);
+}
+
+/* --- REACTIVE PROPERTIES --- */
+.reactive-card{
+  width:100%;padding:20px;border-radius:14px;
+  background:rgba(15,23,42,0.6);backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,0.06);
+  transition:all 0.5s;
+  text-align:center;
+}
+.reactive-card .r-value{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:2.5rem;font-weight:700;
+  line-height:1.2;margin-bottom:4px;
+}
+.reactive-card .r-label{font-size:0.75rem;color:#64748B}
+.reactive-sliders{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.reactive-sliders label{
+  display:flex;justify-content:space-between;
+  font-size:0.7rem;color:#94A3B8;font-family:'JetBrains Mono',monospace;
+}
+.reactive-sliders input[type=range]{
+  width:100%;-webkit-appearance:none;appearance:none;
+  height:3px;border-radius:2px;
+  background:rgba(255,255,255,0.08);
+  outline:none;
+}
+.reactive-sliders input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  width:12px;height:12px;border-radius:50%;
+  background:#8B5CF6;cursor:pointer;
+  border:2px solid rgba(255,255,255,0.15);
+}
+.time-indicator{font-size:0.65rem;color:#64748B;font-family:'JetBrains Mono',monospace;margin-top:8px}
+
+/* --- SENSORY INDICATORS --- */
+.sensory-grid{
+  display:flex;gap:12px;flex-wrap:wrap;justify-content:center;
+}
+.sensory-unit{
+  background:rgba(15,23,42,0.4);border-radius:10px;
+  border:1px solid rgba(255,255,255,0.04);
+  padding:16px;text-align:center;flex:1;min-width:100px;
+}
+.sensory-unit .s-icon{font-size:24px;margin-bottom:6px}
+.sensory-unit .s-label{font-size:0.65rem;color:#64748B;font-family:'JetBrains Mono',monospace;margin-bottom:8px}
+.sensory-unit .s-wave{
+  height:24px;display:flex;align-items:flex-end;justify-content:center;gap:2px;
+}
+.sensory-unit .s-wave span{
+  width:3px;border-radius:2px;
+  background:#06B6D4;min-height:2px;
+  transition:height 0.1s;
+}
+.sensory-unit .s-heat{
+  height:24px;border-radius:4px;
+  background:linear-gradient(90deg,#06B6D4,#10B981,#F59E0B,#FF2D78);
+  width:var(--heat-level,50%);
+  transition:width 0.3s;
+}
+.sensory-unit .s-space{
+  position:relative;width:100%;height:40px;
+}
+.sensory-unit .s-space .dot{
+  width:6px;height:6px;border-radius:50%;
+  background:#06B6D4;position:absolute;
+  transition:left 0.5s cubic-bezier(0.34,1.56,0.64,1),top 0.5s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+/* --- CONTROLS SECTION --- */
+.controls-grid{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:12px;
+}
+@media(max-width:900px){.controls-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:500px){.controls-grid{grid-template-columns:1fr}}
+.control-item{
+  background:rgba(15,23,42,0.4);
+  border-radius:10px;border:1px solid rgba(255,255,255,0.04);
+  padding:14px 16px;
+}
+.control-item label{
+  display:flex;justify-content:space-between;
+  font-size:0.7rem;color:#94A3B8;font-family:'JetBrains Mono',monospace;
+  margin-bottom:6px;
+}
+.control-item input[type=range]{
+  width:100%;-webkit-appearance:none;appearance:none;
+  height:3px;border-radius:2px;
+  background:rgba(255,255,255,0.08);outline:none;
+}
+.control-item input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  width:14px;height:14px;border-radius:50%;
+  background:#06B6D4;cursor:pointer;
+  border:2px solid rgba(255,255,255,0.2);
+  box-shadow:0 0 12px rgba(6,182,212,0.3);
+}
+.control-item .val{color:#06B6D4}
+
+/* --- FOOTER --- */
+.footer{
+  text-align:center;padding:48px 24px;
+  border-top:1px solid rgba(255,255,255,0.04);
+}
+.footer h3{background:linear-gradient(135deg,#F1F5F9,#06B6D4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.footer p{color:#64748B;font-size:0.85rem;margin-top:8px}
+.footer .tagline{color:#06B6D4;font-family:'Space Grotesk',sans-serif;font-weight:600;margin-top:4px;font-size:0.9rem}
+
+/* --- Responsive tweaks --- */
+@media(max-width:768px){
+  .trend-card-header h3{font-size:0.85rem}
+  .trend-code{font-size:0.6rem;padding:10px 12px}
+  .trend-demo{padding:16px;min-height:130px}
+  .material-card{width:80px;height:90px}
+  .material-card .mat-icon{font-size:18px}
+  .material-card .mat-label{font-size:0.6rem}
+  .spatial-card{width:90px;height:60px;font-size:0.6rem}
+  .control-item{padding:12px}
+}
+
+/* --- Reduced motion --- */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:0.01ms!important;transition-duration:0.01ms!important}
+  .grain-overlay{display:none}
+}
+
+/* --- Animations --- */
+@keyframes fadeIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes glow-pulse{0%,100%{opacity:0.6}50%{opacity:1}}
+.fade-in{animation:fadeIn 0.6s ease-out both}
+.float{animation:float 4s ease-in-out infinite}
+</style>
+</head>
+<body>
+
+<!-- Custom Cursor -->
+<div class="cursor-glow" id="cursorGlow"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+
+<!-- Grain Overlay -->
+<div class="grain-overlay" id="grainOverlay"></div>
+
+<div class="app-container">
+
+<!-- ======================== HEADER ======================== -->
+<header class="header fade-in">
+  <div class="header-badge">Design Lang v0.1 — Interactive Prototype</div>
+  <h1>Design Lang</h1>
+  <p class="subtitle">A new medium for spatial, temporal, multi-sensory experience design. Not CSS. Not HTML. Something beyond.</p>
+</header>
+
+<!-- ==================== EDITOR + PREVIEW ==================== -->
+<section class="editor-preview fade-in" style="animation-delay:0.15s">
+  
+  <!-- Code Editor -->
+  <div class="editor-panel">
+    <div class="editor-header">
+      <span class="editor-dot"></span>
+      <span class="editor-dot"></span>
+      <span class="editor-dot"></span>
+      <span class="editor-label">card.design</span>
+    </div>
+    <div class="editor-body" id="editorBody"><span class="cm">// Design Lang — Material Card v1</span>
+<span class="tag">element</span> <span class="fn">card</span> {
+  <span class="pr">surface</span>: <span class="fn">material</span>(<span class="str">ceramic</span>, 
+    <span class="pr">glaze</span>: <span class="fn">glossy</span>(<span class="num">85</span><span class="un">%</span>),
+    <span class="pr">warmth</span>: <span class="num">0.7</span>
+  )
+  <span class="pr">light</span>: <span class="fn">reflects</span>(
+    <span class="pr">specular</span>: <span class="fn">curved</span>(<span class="op">$cursor</span>),
+    <span class="pr">ambient</span>: <span class="fn">environment</span>.<span class="pr">timeofday</span>
+  )
+  <span class="pr">physics</span>: <span class="fn">spring</span>(
+    <span class="pr">stiffness</span>: <span class="num">180</span>, 
+    <span class="pr">damping</span>: <span class="num">20</span>
+  )
+  <span class="pr">on</span>: <span class="fn">user.presses</span> {
+    <span class="pr">displacement</span>: -<span class="num">2</span><span class="un">mm</span>
+    <span class="pr">haptic</span>: <span class="fn">click</span>(<span class="pr">force</span>: <span class="num">30</span><span class="un">g</span>)
+    <span class="pr">release</span>: <span class="fn">oscillate</span>(
+      <span class="pr">freq</span>: <span class="num">80</span><span class="un">hz</span>, <span class="pr">damp</span>: <span class="num">0.7</span>
+    )
+  }
+}</div>
+  </div>
+
+  <!-- Live Preview -->
+  <div class="preview-panel" id="previewPanel">
+    <div class="preview-header">
+      <span class="preview-label">▶ Live Render</span>
+      <span class="preview-status">compiled · 60fps</span>
+    </div>
+    <div class="preview-stage" id="previewStage">
+      <div class="render-card glass-hover" id="renderCard">
+        <div class="card-content">
+          <div class="card-icon">✦</div>
+          <div class="card-title">Ceramic Surface</div>
+          <div class="card-desc">Glossy · 85% · Warm 0.7<br/>Cursor follows specular</div>
+        </div>
+        <div class="code-overlay">
+          <span class="dl-cm">// Compiled from Design Lang</span><br>
+          <span class="dl-kw">material</span><span class="dl-fn">(</span><span class="dl-str">ceramic</span><span class="dl-fn">, glaze: glossy</span><span class="dl-fn">(</span><span class="dl-num">85%</span><span class="dl-fn">)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 5 TREND SECTIONS ==================== -->
+<section class="trend-section fade-in" style="animation-delay:0.3s">
+
+<!-- Trend 1: Material System -->
+<div class="trend-card">
+  <div class="trend-card-header">
+    <h3>01 · Material System</h3>
+    <span class="trend-badge">4 materials</span>
+  </div>
+  <div class="trend-code"><span style="color:#06B6D4">surface</span>: <span style="color:#C084FC">material</span>(<span style="color:#34D399">ceramic</span>, glaze: <span style="color:#C084FC">glossy</span>(<span style="color:#FBBF24">85%</span>))</div>
+  <div class="trend-demo">
+    <div class="material-card mat-glass" data-mat="glass">
+      <div class="mat-icon">🪟</div>
+      <div class="mat-label">Glass</div>
+      <div style="position:absolute;bottom:4px;font-size:0.5rem;color:rgba(255,255,255,0.3)">blur 12px</div>
+    </div>
+    <div class="material-card mat-ceramic" data-mat="ceramic" id="ceramicCard">
+      <div class="mat-icon">🏺</div>
+      <div class="mat-label">Ceramic</div>
+      <div style="position:absolute;bottom:4px;font-size:0.5rem;color:rgba(45,27,54,0.4)">glossy 85%</div>
+    </div>
+    <div class="material-card mat-metal" data-mat="metal" id="metalCard">
+      <div class="mat-icon">🔩</div>
+      <div class="mat-label">Brushed Metal</div>
+      <div style="position:absolute;bottom:4px;font-size:0.5rem;color:rgba(26,26,46,0.4)">linear grain</div>
+    </div>
+    <div class="material-card mat-textile" data-mat="textile">
+      <div class="mat-icon">🧶</div>
+      <div class="mat-label">Textile Woven</div>
+      <div style="position:absolute;bottom:4px;font-size:0.5rem;color:rgba(26,14,8,0.4)">warm weave</div>
+    </div>
+  </div>
+</div>
+
+<!-- Trend 2: Spatial Depth -->
+<div class="trend-card" style="margin-top:16px">
+  <div class="trend-card-header">
+    <h3>02 · Spatial Depth (Z-Space)</h3>
+    <span class="trend-badge">perspective 800px</span>
+  </div>
+  <div class="trend-code"><span style="color:#06B6D4">position</span>: <span style="color:#C084FC">space</span>(<span style="color:#34D399">center</span>, <span style="color:#34D399">mid</span>, z: <span style="color:#FBBF24">1</span>)</div>
+  <div class="trend-demo" id="spatialDemo">
+    <div class="spatial-stage" id="spatialStage">
+      <div class="spatial-card spatial-close" style="position:relative">
+        Close (z:3)
+        <span class="badge">z:3</span>
+      </div>
+      <div class="spatial-card spatial-mid" style="position:relative">
+        Mid (z:1)
+        <span class="badge">z:1</span>
+      </div>
+      <div class="spatial-card spatial-far" style="position:relative">
+        Far (z:-2)
+        <span class="badge">z:-2</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Trend 3: Physics & Motion -->
+<div class="trend-card" style="margin-top:16px">
+  <div class="trend-card-header">
+    <h3>03 · Physics &amp; Motion</h3>
+    <span class="trend-badge">spring dynamics</span>
+  </div>
+  <div class="trend-code"><span style="color:#06B6D4">physics</span>: <span style="color:#C084FC">spring</span>(<span style="color:#F472B6">stiffness</span>: <span style="color:#FBBF24">180</span>, <span style="color:#F472B6">damping</span>: <span style="color:#FBBF24">20</span>)</div>
+  <div class="trend-demo" style="flex-direction:column">
+    <button class="physics-btn" id="physicsBtn">Press Me</button>
+    <div class="physics-controls">
+      <label>Stiffness <span id="stiffnessVal" style="color:#06B6D4">180</span></label>
+      <input type="range" id="stiffnessSlider" min="50" max="300" value="180" step="1">
+      <label>Damping <span id="dampingVal" style="color:#06B6D4">20</span></label>
+      <input type="range" id="dampingSlider" min="5" max="50" value="20" step="1">
+    </div>
+  </div>
+</div>
+
+<!-- Trend 4: Reactive Properties -->
+<div class="trend-card" style="margin-top:16px">
+  <div class="trend-card-header">
+    <h3>04 · Reactive Properties</h3>
+    <span class="trend-badge">expression-based</span>
+  </div>
+  <div class="trend-code"><span style="color:#06B6D4">color</span>: <span style="color:#C084FC">expression</span>(<span style="color:#F472B6">base</span>: <span style="color:#FBBF24">#06B6D4</span>, <span style="color:#F472B6">modulate</span>: <span style="color:#34D399">user.biometrics.heartrate</span>)</div>
+  <div class="trend-demo" style="flex-direction:column">
+    <div class="reactive-card" id="reactiveCard">
+      <div class="r-value" id="reactiveValue" style="color:#06B6D4">72</div>
+      <div class="r-label">heartrate (bpm)</div>
+      <div class="reactive-sliders">
+        <label>Heart Rate <span id="hrVal" style="color:#8B5CF6">72 bpm</span></label>
+        <input type="range" id="hrSlider" min="40" max="120" value="72" step="1">
+        <label>Cognitive Load <span id="clVal" style="color:#8B5CF6">3 / 10</span></label>
+        <input type="range" id="clSlider" min="1" max="10" value="3" step="1">
+      </div>
+      <div class="time-indicator" id="timeIndicator">Time of day: Day mode</div>
+    </div>
+  </div>
+</div>
+
+<!-- Trend 5: Sensory Output -->
+<div class="trend-card" style="margin-top:16px">
+  <div class="trend-card-header">
+    <h3>05 · Sensory Output Indicators</h3>
+    <span class="trend-badge">haptic · audio · thermal</span>
+  </div>
+  <div class="trend-code"><span style="color:#06B6D4">haptic</span>: <span style="color:#C084FC">pattern</span>(<span style="color:#34D399">click</span>, force: <span style="color:#FBBF24">30g</span>)</div>
+  <div class="trend-demo">
+    <div class="sensory-grid" id="sensoryGrid">
+      <div class="sensory-unit">
+        <div class="s-icon">👆</div>
+        <div class="s-label">Haptic — Click</div>
+        <div class="s-wave" id="hapticWave"></div>
+      </div>
+      <div class="sensory-unit">
+        <div class="s-icon">🎵</div>
+        <div class="s-label">Spatial Audio</div>
+        <div class="s-space" id="audioSpace">
+          <div class="dot" id="audioDot" style="left:50%;top:50%"></div>
+        </div>
+      </div>
+      <div class="sensory-unit">
+        <div class="s-icon">🌡️</div>
+        <div class="s-label">Thermal</div>
+        <div class="s-heat" id="thermalBar" style="--heat-level:50%"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</section>
+
+<!-- ==================== GLOBAL CONTROLS ==================== -->
+<section class="trend-section fade-in" style="animation-delay:0.45s">
+  <h2 class="section-title">Interactive Controls</h2>
+  <p class="section-subtitle">Adjust Design Lang properties and see the preview react in real-time</p>
+  <div class="controls-grid">
+    <div class="control-item">
+      <label>Stiffness <span class="val" id="ctlStiffVal">180</span></label>
+      <input type="range" id="ctlStiffness" min="50" max="300" value="180" step="1">
+    </div>
+    <div class="control-item">
+      <label>Damping <span class="val" id="ctlDampVal">20</span></label>
+      <input type="range" id="ctlDamping" min="5" max="50" value="20" step="1">
+    </div>
+    <div class="control-item">
+      <label>Gloss <span class="val" id="ctlGlossVal">85%</span></label>
+      <input type="range" id="ctlGloss" min="50" max="100" value="85" step="1">
+    </div>
+    <div class="control-item">
+      <label>Heart Rate <span class="val" id="ctlHRVal">72 bpm</span></label>
+      <input type="range" id="ctlHR" min="40" max="120" value="72" step="1">
+    </div>
+    <div class="control-item">
+      <label>Cognitive Load <span class="val" id="ctlCLVal">3</span></label>
+      <input type="range" id="ctlCL" min="1" max="10" value="3" step="1">
+    </div>
+  </div>
+</section>
+
+<!-- ==================== FOOTER ==================== -->
+<footer class="footer fade-in">
+  <h3>Design Lang v0.1</h3>
+  <p>Empire Creative · May 2026</p>
+  <div class="tagline">Writing the language the future of design deserves.</div>
+</footer>
+
+</div><!-- /app-container -->
+
+<script>
+/* ============================================================
+   DESIGN LANG PROTOTYPE — Full Interactivity Engine
+   ============================================================ */
+
+(function(){
+'use strict';
+
+// ======================== CURSOR ========================
+const cursorGlow = document.getElementById('cursorGlow');
+const cursorDot = document.getElementById('cursorDot');
+let mx = -100, my = -100, gx = -100, gy = -100;
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cursorDot.style.left = mx + 'px';
+  cursorDot.style.top = my + 'px';
+});
+
+function animateCursor(){
+  gx += (mx - gx) * 0.12;
+  gy += (my - gy) * 0.12;
+  cursorGlow.style.left = gx + 'px';
+  cursorGlow.style.top = gy + 'px';
+  requestAnimationFrame(animateCursor);
+}
+animateCursor();
+
+document.addEventListener('mouseleave', () => {
+  cursorGlow.style.opacity = '0';
+  cursorDot.style.opacity = '0';
+});
+document.addEventListener('mouseenter', () => {
+  cursorGlow.style.opacity = '1';
+  cursorDot.style.opacity = '1';
+});
+
+// Hide cursor on touch devices
+if('ontouchstart' in window){
+  cursorGlow.style.display = 'none';
+  cursorDot.style.display = 'none';
+}
+
+// ==================== MATERIAL CARD CURSOR TRACKING ====================
+document.querySelectorAll('.mat-ceramic').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const r = card.getBoundingClientRect();
+    const x = ((e.clientX - r.left) / r.width * 100).toFixed(1);
+    const y = ((e.clientY - r.top) / r.height * 100).toFixed(1);
+    card.style.setProperty('--mcx', x + '%');
+    card.style.setProperty('--mcy', y + '%');
+  });
+});
+
+document.querySelectorAll('.mat-metal').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const r = card.getBoundingClientRect();
+    const x = ((e.clientX - r.left) / r.width * 100).toFixed(1);
+    card.style.setProperty('--msx', x + '%');
+  });
+});
+
+// ==================== RENDER CARD (Live Preview) ====================
+const renderCard = document.getElementById('renderCard');
+const previewStage = document.getElementById('previewStage');
+
+if(renderCard && previewStage){
+  // Specular follows cursor
+  previewStage.addEventListener('mousemove', e => {
+    const r = renderCard.getBoundingClientRect();
+    const px = ((e.clientX - r.left) / r.width * 100).toFixed(1);
+    const py = ((e.clientY - r.top) / r.height * 100).toFixed(1);
+    renderCard.style.setProperty('--spec-x', px + '%');
+    renderCard.style.setProperty('--spec-y', py + '%');
+  });
+
+  // Press interaction with physics
+  let isPressed = false;
+  let pressStart = 0;
+  let releaseTimer = null;
+
+  const pressCard = () => {
+    if(isPressed) return;
+    isPressed = true;
+    pressStart = performance.now();
+    renderCard.classList.remove('released');
+    renderCard.classList.add('pressed');
+  };
+
+  const releaseCard = () => {
+    if(!isPressed) return;
+    isPressed = false;
+    const stiffness = parseInt(document.getElementById('stiffnessSlider')?.value || 180);
+    const damping = parseInt(document.getElementById('dampingSlider')?.value || 20);
+    renderCard.classList.remove('pressed');
+    renderCard.classList.add('released');
+    // Spring back with physics
+    renderCard.style.transition = `transform ${0.3 + damping/100}s cubic-bezier(${Math.min(stiffness/300, 0.8)}, ${1.2 - damping/100}, 0.64, 1)`;
+    renderCard.style.transform = 'scale(0.95) translateY(4px)';
+    requestAnimationFrame(() => {
+      renderCard.style.transform = '';
+    });
+  };
+
+  renderCard.addEventListener('mousedown', pressCard);
+  renderCard.addEventListener('mouseup', releaseCard);
+  renderCard.addEventListener('mouseleave', () => { if(isPressed) releaseCard(); });
+  renderCard.addEventListener('touchstart', e => { e.preventDefault(); pressCard(); });
+  renderCard.addEventListener('touchend', e => { e.preventDefault(); releaseCard(); });
+}
+
+// ==================== PHYSICS DEMO ====================
+const physicsBtn = document.getElementById('physicsBtn');
+const stiffnessSlider = document.getElementById('stiffnessSlider');
+const dampingSlider = document.getElementById('dampingSlider');
+const stiffnessVal = document.getElementById('stiffnessVal');
+const dampingVal = document.getElementById('dampingVal');
+
+if(physicsBtn){
+  let phyPressed = false;
+  let phyTimer = null;
+
+  const pressPhy = () => {
+    if(phyPressed) return;
+    phyPressed = true;
+    physicsBtn.classList.remove('releasing');
+    physicsBtn.classList.add('pressed');
+    const s = parseInt(stiffnessSlider?.value || 180);
+    const d = parseInt(dampingSlider?.value || 20);
+    const scale = 1 - (Math.min(s, 300) / 3000);
+    physicsBtn.style.transform = `scale(${scale}) translateY(${Math.min(s/30, 6)}px)`;
+  };
+
+  const releasePhy = () => {
+    if(!phyPressed) return;
+    phyPressed = false;
+    const s = parseInt(stiffnessSlider?.value || 180);
+    const d = parseInt(dampingSlider?.value || 20);
+    physicsBtn.classList.remove('pressed');
+    physicsBtn.classList.add('releasing');
+    // Spring simulation
+    const duration = 0.3 + (d/100);
+    const bounce = Math.min(s/300, 0.8);
+    physicsBtn.style.transition = `transform ${duration}s cubic-bezier(${bounce}, ${1.4 - d/100}, 0.64, 1)`;
+    physicsBtn.style.transform = '';
+  };
+
+  physicsBtn.addEventListener('mousedown', pressPhy);
+  physicsBtn.addEventListener('mouseup', releasePhy);
+  physicsBtn.addEventListener('mouseleave', () => { if(phyPressed) releasePhy(); });
+  physicsBtn.addEventListener('touchstart', e => { e.preventDefault(); pressPhy(); });
+  physicsBtn.addEventListener('touchend', e => { e.preventDefault(); releasePhy(); });
+}
+
+if(stiffnessSlider){
+  stiffnessSlider.addEventListener('input', e => {
+    const v = e.target.value;
+    if(stiffnessVal) stiffnessVal.textContent = v;
+    document.getElementById('ctlStiffVal') && (document.getElementById('ctlStiffVal').textContent = v);
+    document.getElementById('ctlStiffness') && (document.getElementById('ctlStiffness').value = v);
+  });
+}
+if(dampingSlider){
+  dampingSlider.addEventListener('input', e => {
+    const v = e.target.value;
+    if(dampingVal) dampingVal.textContent = v;
+    document.getElementById('ctlDampVal') && (document.getElementById('ctlDampVal').textContent = v);
+    document.getElementById('ctlDamping') && (document.getElementById('ctlDamping').value = v);
+  });
+}
+
+// ==================== REACTIVE PROPERTIES ====================
+const hrSlider = document.getElementById('hrSlider');
+const hrVal = document.getElementById('hrVal');
+const clSlider = document.getElementById('clSlider');
+const clVal = document.getElementById('clVal');
+const reactiveCard = document.getElementById('reactiveCard');
+const reactiveValue = document.getElementById('reactiveValue');
+const timeIndicator = document.getElementById('timeIndicator');
+
+function updateReactive(){
+  const hr = parseInt(hrSlider?.value || 72);
+  const cl = parseInt(clSlider?.value || 3);
+  
+  if(reactiveValue){
+    reactiveValue.textContent = hr;
+    // Color shifts with heart rate
+    const t = (hr - 40) / 80; // 0..1
+    const hue = 180 - t * 60; // cyan to pinkish
+    const sat = 80 + t * 20;
+    const light = 55 + (1-t) * 15;
+    reactiveValue.style.color = `hsl(${hue}, ${sat}%, ${light}%)`;
+  }
+
+  // Time of day detection
+  const now = new Date();
+  const hour = now.getHours();
+  let mode, hue2;
+  if(hour >= 5 && hour < 8){ mode = 'Dawn'; hue2 = 25; }
+  else if(hour >= 8 && hour < 17){ mode = 'Day'; hue2 = 180; }
+  else if(hour >= 17 && hour < 20){ mode = 'Dusk'; hue2 = 35; }
+  else { mode = 'Night'; hue2 = 260; }
+  
+  if(timeIndicator) timeIndicator.textContent = `Time of day: ${mode} mode (${hour}:00)`;
+
+  // Update card background based on time + cognitive load
+  if(reactiveCard){
+    const opacity = 0.4 + (cl / 10) * 0.4; // cognitive load affects density
+    const blurVal = 8 + cl * 2;
+    reactiveCard.style.background = `hsla(${hue2}, 30%, 12%, ${opacity})`;
+    reactiveCard.style.backdropFilter = `blur(${blurVal}px)`;
+  }
+
+  // Pulse animation based on heart rate
+  if(reactiveCard){
+    const pulseDuration = 60 / hr;
+    reactiveCard.style.animation = `pulse-dot ${pulseDuration}s infinite`;
+  }
+}
+
+if(hrSlider) hrSlider.addEventListener('input', e => {
+  hrVal && (hrVal.textContent = e.target.value + ' bpm');
+  document.getElementById('ctlHRVal') && (document.getElementById('ctlHRVal').textContent = e.target.value + ' bpm');
+  document.getElementById('ctlHR') && (document.getElementById('ctlHR').value = e.target.value);
+  updateReactive();
+});
+
+if(clSlider) clSlider.addEventListener('input', e => {
+  clVal && (clVal.textContent = e.target.value + ' / 10');
+  document.getElementById('ctlCLVal') && (document.getElementById('ctlCLVal').textContent = e.target.value);
+  document.getElementById('ctlCL') && (document.getElementById('ctlCL').value = e.target.value);
+  updateReactive();
+});
+
+// Initial call
+updateReactive();
+
+// ==================== SENSORY INDICATORS ====================
+// Haptic wave
+const hapticWave = document.getElementById('hapticWave');
+if(hapticWave){
+  const patterns = [
+    [2,8,2,8,2],     // click
+    [6,4,6,4,6,4,6], // pulse
+    [2,2,2,2,2,2,2,2] // texture
+  ];
+  let patternIdx = 0;
+  function renderHaptic(){
+    const p = patterns[patternIdx % patterns.length];
+    hapticWave.innerHTML = '';
+    const total = p.reduce((a,b)=>a+b, 0);
+    p.forEach(h => {
+      const bar = document.createElement('span');
+      const pct = h / Math.max(...p.map(x=>x)) * 100;
+      bar.style.height = Math.max(4, pct * 0.6) + 'px';
+      bar.style.background = '#06B6D4';
+      const gap = 100 / p.length;
+      bar.style.marginRight = gap * 0.2 + 'px';
+      hapticWave.appendChild(bar);
+    });
+  }
+  renderHaptic();
+  setInterval(() => { patternIdx++; renderHaptic(); }, 2000);
+}
+
+// Spatial Audio
+const audioDot = document.getElementById('audioDot');
+if(audioDot){
+  let angle = 0;
+  function animateAudio(){
+    angle += 0.008;
+    const x = 50 + Math.sin(angle) * 30;
+    const y = 50 + Math.cos(angle * 0.7) * 20;
+    audioDot.style.left = x + '%';
+    audioDot.style.top = y + '%';
+    requestAnimationFrame(animateAudio);
+  }
+  animateAudio();
+}
+
+// Thermal
+const thermalBar = document.getElementById('thermalBar');
+if(thermalBar){
+  let thermDir = 1;
+  let thermLevel = 30;
+  setInterval(() => {
+    thermLevel += thermDir * 2;
+    if(thermLevel > 80) thermDir = -1;
+    if(thermLevel < 20) thermDir = 1;
+    thermalBar.style.setProperty('--heat-level', thermLevel + '%');
+  }, 200);
+}
+
+// ==================== SPATIAL CARDS TILT ====================
+const spatialStage = document.getElementById('spatialStage');
+if(spatialStage){
+  const cards = spatialStage.querySelectorAll('.spatial-card');
+  spatialStage.addEventListener('mousemove', e => {
+    const r = spatialStage.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width - 0.5;
+    const y = (e.clientY - r.top) / r.height - 0.5;
+    cards.forEach((card, i) => {
+      const factor = [1.5, 0.8, 0.3][i] || 0.5;
+      const rotY = x * 20 * factor;
+      const rotX = -y * 15 * factor;
+      card.style.transform = card.style.transform.replace(/rotateX\([^)]+\) rotateY\([^)]+\)/g, '');
+      card.style.transform += ` rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+    });
+  });
+  spatialStage.addEventListener('mouseleave', () => {
+    cards.forEach(c => {
+      c.style.transform = ''; // reset to CSS classes
+    });
+  });
+}
+
+// ==================== GLOBAL CONTROLS (sync) ====================
+function syncGlobalControls(){
+  const ctlStiff = document.getElementById('ctlStiffness');
+  const ctlDamp = document.getElementById('ctlDamping');
+  const ctlGloss = document.getElementById('ctlGloss');
+  const ctlHR = document.getElementById('ctlHR');
+  const ctlCL = document.getElementById('ctlCL');
+
+  if(ctlStiff){
+    ctlStiff.addEventListener('input', e => {
+      const v = e.target.value;
+      document.getElementById('ctlStiffVal').textContent = v;
+      if(stiffnessSlider) stiffnessSlider.value = v;
+      if(stiffnessVal) stiffnessVal.textContent = v;
+    });
+  }
+  if(ctlDamp){
+    ctlDamp.addEventListener('input', e => {
+      const v = e.target.value;
+      document.getElementById('ctlDampVal').textContent = v;
+      if(dampingSlider) dampingSlider.value = v;
+      if(dampingVal) dampingVal.textContent = v;
+    });
+  }
+  if(ctlGloss){
+    ctlGloss.addEventListener('input', e => {
+      const v = e.target.value;
+      document.getElementById('ctlGlossVal').textContent = v + '%';
+      // Update ceramic card gloss
+      document.querySelectorAll('.mat-ceramic').forEach(c => {
+        c.style.boxShadow = `0 4px 20px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,${0.1 + v/500}) inset, 0 1px 0 rgba(255,255,255,${0.15 + v/300}) inset`;
+      });
+    });
+  }
+  if(ctlHR){
+    ctlHR.addEventListener('input', e => {
+      const v = e.target.value;
+      document.getElementById('ctlHRVal').textContent = v + ' bpm';
+      if(hrSlider) hrSlider.value = v;
+      if(hrVal) hrVal.textContent = v + ' bpm';
+      updateReactive();
+    });
+  }
+  if(ctlCL){
+    ctlCL.addEventListener('input', e => {
+      const v = e.target.value;
+      document.getElementById('ctlCLVal').textContent = v;
+      if(clSlider) clSlider.value = v;
+      if(clVal) clVal.textContent = v + ' / 10';
+      updateReactive();
+    });
+  }
+}
+syncGlobalControls();
+
+// ==================== SCROLL REVEAL ====================
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if(entry.isIntersecting){
+      entry.target.style.opacity = '1';
+      entry.target.style.transform = 'translateY(0)';
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.trend-card').forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(24px)';
+  el.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+  observer.observe(el);
+});
+
+// Also reveal controls and footer
+document.querySelector('.controls-grid') && observer.observe(document.querySelector('.controls-grid'));
+document.querySelector('.footer') && observer.observe(document.querySelector('.footer'));
+
+console.log('🔮 Design Lang Prototype v0.1 — Compiled and running');
+console.log('   Space is primary. Time is native. Senses are properties.');
+console.log('   Intention over implementation.');
+
+})();
+</script>
+
+</body>
+</html>
